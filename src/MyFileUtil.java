@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 
 public class MyFileUtil {
 
@@ -20,9 +21,8 @@ public class MyFileUtil {
         }
 
         //Trường hợp đó là folder thì phải delete các file bên trong trước
-        String[] childPaths = file.list();
-        for(String childPath : childPaths){
-            if(delete(childPath) == false){
+        for(String childPath : file.list()){
+            if(delete(path + "\\" + childPath) == false){
                 return false;
             }
         }
@@ -48,9 +48,8 @@ public class MyFileUtil {
         }
 
         //Trường hợp đó là folder thì phải delete các file bên trong, giữ lại thư mục
-        String[] childPaths = file.list();
-        for(String childPath : childPaths){
-            if(deleteFileOnly(childPath) == false){
+        for(String childPath : file.list()){
+            if(deleteFileOnly(path + "\\" + childPath) == false){
                 return false;
             }
         }
