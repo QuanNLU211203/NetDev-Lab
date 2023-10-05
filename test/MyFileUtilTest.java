@@ -37,6 +37,12 @@ public class MyFileUtilTest extends TestCase {
         file6.createNewFile();
         file7.createNewFile();
     }
+
+    @Override
+    public void tearDown(){
+        new MyFileUtil().delete("testresource");
+    }
+
     public void testDelete(){
         new MyFileUtil().delete("testresource");
         assertFalse(new File("testresource").exists());
@@ -68,8 +74,23 @@ public class MyFileUtilTest extends TestCase {
         assertTrue(condition1 && condition2);
     }
 
-    @Override
-    public void tearDown(){
-        new MyFileUtil().delete("testresource");
+    public void testFindFirst(){
+        new MyFileUtil().findFirst("testresource", "dir");
+    }
+
+    public void testDirTree(){
+        new MyFileUtil().dirTree("testresource");
+    }
+
+    public void testDirStat(){
+        System.out.println(new MyFileUtil().dirStat("D:\\ZZ"));
+    }
+
+    public void testFindAll(){
+        new MyFileUtil().findAll("D:\\Test", "txt", "docx", "pdf");
+    }
+
+    public void testDeleteAll(){
+        new MyFileUtil().deleteAll("D:\\Test", "txt", "docx", "pdf");
     }
 }
