@@ -8,7 +8,7 @@ public class MyFileUtilTest extends TestCase {
     public void setUp() throws IOException {
         File root = new File("testresource");
 
-        File file1 = new File("testresource\\file1.txt");
+        File file1 = new File("testresource\\a1.txt");
 
         File dir1 = new File("testresource\\dir1");
         File file2 = new File("testresource\\dir1\\file2.txt");
@@ -25,14 +25,14 @@ public class MyFileUtilTest extends TestCase {
 
         root.mkdirs();
         dir1.mkdirs();
-        dir2.mkdirs();
+        file1.createNewFile();
         dir1_1.mkdirs();
         dir1_2.mkdirs();
         dir1_2_1.mkdirs();
-        file1.createNewFile();
         file2.createNewFile();
         file3.createNewFile();
         file4.createNewFile();
+        dir2.mkdirs();
         file5.createNewFile();
         file6.createNewFile();
         file7.createNewFile();
@@ -52,7 +52,7 @@ public class MyFileUtilTest extends TestCase {
         new MyFileUtil().deleteFileOnly("testresource");
 
         File root = new File("testresource");
-        File file1 = new File("testresource\\file1.txt");
+        File file1 = new File("testresource\\a.txt");
         File dir1 = new File("testresource\\dir1");
         File file2 = new File("testresource\\dir1\\file2.txt");
         File file3 = new File("testresource\\dir1\\file3.txt");
@@ -78,7 +78,7 @@ public class MyFileUtilTest extends TestCase {
         new MyFileUtil().findFirst("testresource", "dir");
     }
 
-    public void testDirTree(){
+    public void testDirTree(){ // Show case !!!
         new MyFileUtil().dirTree("testresource");
     }
 

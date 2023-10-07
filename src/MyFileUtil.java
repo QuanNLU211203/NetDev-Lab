@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MyFileUtil {
 
@@ -63,6 +66,12 @@ public class MyFileUtil {
         return true;
     }
 
+    /**
+     * Tìm và in ra console file/thư mục đầu tiên có tên chứa một chuỗi con cho trước
+     * @param path thư mục cần tìm
+     * @param pattern chuỗi con
+     * @return true nếu tìm được và sẽ in ra console.
+     */
     public boolean findFirst(String path, String pattern){
         try {
             File dir = new File(path);
@@ -84,25 +93,59 @@ public class MyFileUtil {
         }
     }
 
+    /**
+     * In ra console cây thư mục từ một thư mục cho trước.
+     * @param path đường dẫn thư mục
+     */
     public void dirTree(String path){
         File file = new File(path);
         if(!file.exists()){
             System.out.println("File hoặc thư mục không tồn tại");
         }
-        printTree(path, 0);
+        printTree(file, 0, new LinkedList<Boolean>());
     }
 
-    private void printTree(String path, int height){
-        File file = new File(path);
+    /**
+     *
+     * @param file
+     * @param height cấp bậc của file tính từ root
+     * @param vlp "Vertical Line Position":
+     *            là list boolean có độ dài tùy thuộc.
+     *            Nếu là false thì không có đường kẻ dọc.
+     *            Nếu là true thì ngược lại.
+     */
+    private void printTree(File file, int height, List<Boolean> vlp){
         StringBuilder builder = new StringBuilder();
-        for(int i = 0; i < height; i++){
-            builder.append("\t");
+        int count = vlp.size();
+        for(boolean position : vlp){
+            if(count == 1){
+                break;
+            }
+            if(position == true){
+                builder.append("|\t");
+            }
+            else {
+                builder.append('\t');
+            }
+            count--;
+        }
+        if(height != 0){
+            builder.append("+-");
         }
         builder.append(file.getName());
         System.out.println(builder.toString());
+
         if(file.isDirectory()){
-            for(String childName : file.list()){
-                printTree(path + "\\" + childName, height + 1);
+            File[] subFiles = file.listFiles();
+            for(int i = 0; i < subFiles.length; i++){
+                List<Boolean> subVCP = new LinkedList<>(vlp);
+                if(i != subFiles.length - 1){
+                    subVCP.add(true);
+                }
+                else{
+                    subVCP.add(false);
+                }
+                printTree(subFiles[i], height + 1, subVCP);
             }
         }
     }
