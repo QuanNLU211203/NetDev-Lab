@@ -1,11 +1,14 @@
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +34,7 @@ public class MyFileUtil {
 
         //Trường hợp đó là folder thì phải delete các file bên trong trước
         for(String childPath : file.list()){
-            if(delete(path + "\\" + childPath) == false){
+            if(delete(path + "/" + childPath) == false){
                 return false;
             }
         }
@@ -58,7 +61,7 @@ public class MyFileUtil {
 
         //Trường hợp đó là folder thì phải delete các file bên trong, giữ lại thư mục
         for(String childPath : file.list()){
-            if(deleteFileOnly(path + "\\" + childPath) == false){
+            if(deleteFileOnly(path + "/" + childPath) == false){
                 return false;
             }
         }
@@ -203,16 +206,90 @@ public class MyFileUtil {
         }
     }
 
-//    public boolean fileCopy(String sFile, String desFile, String moved){
-//        try {
-//            InputStream inputStream = new BufferedInputStream(new FileInputStream(sFile));
-//            byte[] buffer = new byte[100];
-//            while
-//
-//
-//            return false;
-//        } catch (FileNotFoundException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    public boolean fileCopy(String sFile, String desFile, boolean moved){
+        try {
+            int size = 1024;
+            byte[] buffer = new byte[size];
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(sFile), size);
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(desFile));
+
+            int bytesReaded;
+            while ((bytesReaded = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesReaded);
+            }
+
+            inputStream.close();
+            outputStream.close();
+
+            if(moved){
+                delete(sFile);
+            }
+            return true;
+        }
+        catch (IOException e) {
+            return false;
+        }
+    }
+
+    public boolean folderCopy(String sFolder, String destFolder, boolean moved){
+        File sDir = new File(sFolder);
+        File destDir = new File(destFolder);
+
+        if(!sDir.exists()){
+            return false;
+        }
+
+        if(sDir.isFile()){
+            return fileCopy(sFolder, destFolder, moved);
+        }
+        else{
+            if(!destDir.exists()){
+                destDir.mkdir();
+            }
+            String[] childs = sDir.list();
+            for(String child : childs){
+                if(folderCopy(sFolder + "/" + child, destFolder + "/" + child, moved) == false){
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public void copyAll(String sDir, String dDir, String... ext){
+
+    }
+
+    public void fileSplit(String filePath, String desFolder, int bytesPerPart){
+        try {
+            File file = new File(filePath);
+            String filename = file.getName();
+            int extIndex = filename.lastIndexOf('.');
+            String name = filename.substring(0, extIndex);
+            String ext = filename.substring(extIndex);
+
+            //Setup công cụ
+            long numberOfPart = file.length()/bytesPerPart + 1;
+            InputStream is = new BufferedInputStream(new FileInputStream(file), bytesPerPart);
+            byte[] buffer = new byte[bytesPerPart];
+
+            for(int i = 1; i <= numberOfPart; i++){
+                if(is.available() != 0){
+                    OutputStream os = new BufferedOutputStream(
+                            new FileOutputStream(desFolder + "/" + name + "-P" + i + ext));
+                    int bytesRead = is.read(buffer);
+                    os.write(buffer, 0, bytesRead);
+                    os.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String fileType(String fname){
+        int end = fname.lastIndexOf(".");
+        return (end != -1) ? (fname.substring(end + 1)):("None");
+    }
 }

@@ -93,4 +93,20 @@ public class MyFileUtilTest extends TestCase {
     public void testDeleteAll(){
         new MyFileUtil().deleteAll("D:\\Test", "txt", "docx", "pdf");
     }
+
+    public void testFileCopy(){
+        new MyFileUtil().fileCopy("D:\\ZZ\\src.txt", "D:\\ZZ\\des.txt", false);
+    }
+
+    public void testFolderCopy(){
+        new MyFileUtil().folderCopy("testresource", "D:\\YY", false);
+    }
+
+    public void testFileSplit(){
+        new MyFileUtil().fileSplit("D:\\YY\\Bigfile.txt", "D:\\YY", 1024);
+    }
+
+    public void testFileType(){
+        System.out.println(new MyFileUtil().fileType("abc.txt"));
+    }
 }
