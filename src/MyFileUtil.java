@@ -1,5 +1,10 @@
+import model.Student;
+import model.Subject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -9,6 +14,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -248,7 +255,7 @@ public class MyFileUtil {
             }
             String[] childs = sDir.list();
             for(String child : childs){
-                if(folderCopy(sFolder + "/" + child, destFolder + "/" + child, moved) == false){
+                if(!folderCopy(sFolder + "/" + child, destFolder + "/" + child, moved)){
                     return false;
                 }
             }
@@ -267,22 +274,51 @@ public class MyFileUtil {
             String filename = file.getName();
             int extIndex = filename.lastIndexOf('.');
             String name = filename.substring(0, extIndex);
-            String ext = filename.substring(extIndex);
 
             //Setup công cụ
-            long numberOfPart = file.length()/bytesPerPart + 1;
-            InputStream is = new BufferedInputStream(new FileInputStream(file), bytesPerPart);
-            byte[] buffer = new byte[bytesPerPart];
+            int bufferSize = 102400; //100Kb buffer
+            InputStream is = new BufferedInputStream(new FileInputStream(file), bufferSize);
+            byte[] buffer = new byte[bufferSize];
 
-            for(int i = 1; i <= numberOfPart; i++){
-                if(is.available() != 0){
-                    OutputStream os = new BufferedOutputStream(
-                            new FileOutputStream(desFolder + "/" + name + "-P" + i + ext));
-                    int bytesRead = is.read(buffer);
-                    os.write(buffer, 0, bytesRead);
-                    os.close();
+            int part = 1;
+            while(is.available() != 0){
+                int remain = Math.min(is.available(), bytesPerPart);
+                OutputStream os = new BufferedOutputStream(
+                        new FileOutputStream(desFolder + "/" + name + "-P" + part));
+                while(remain > 0){
+                    if(remain > bufferSize){
+                        is.read(buffer);
+                        os.write(buffer);
+                        remain -= bufferSize;
+                    }
+                    else{
+                        is.read(buffer, 0, remain);
+                        os.write(buffer, 0, remain);
+                        remain = 0;
+                    }
                 }
+                os.close();
+                part++;
             }
+            is.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void fileJoin(String desFile, String... filenames){
+        try {
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(desFile));
+            for (String filename : filenames){
+                InputStream is = new BufferedInputStream(new FileInputStream(filename));
+                while(is.available() != 0){
+                    byte[] buffer = new byte[is.available()];
+                    is.read(buffer);
+                    os.write(buffer);
+                }
+                is.close();
+            }
+            os.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -291,5 +327,52 @@ public class MyFileUtil {
     public String fileType(String fname){
         int end = fname.lastIndexOf(".");
         return (end != -1) ? (fname.substring(end + 1)):("None");
+    }
+
+    public void writeStudentList(List<Student> students, String desFile){
+        try {
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(desFile));
+            dos.writeInt(students.size());
+            for(Student student : students){
+                dos.writeInt(student.getId());
+                dos.writeUTF(student.getName());
+                dos.writeInt(student.getSubjects().size());
+                for(Subject subject : student.getSubjects()){
+                    dos.writeInt(subject.getSubjectID());
+                    dos.writeUTF(subject.getSubjectName());
+                    dos.writeInt(subject.getCredits());
+                }
+            }
+            dos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Student> readStudentList(String filename){
+        try {
+            List<Student> students = new ArrayList<>();
+            DataInputStream dis = new DataInputStream(new FileInputStream(filename));
+            int numberOfStudent = dis.readInt();
+            for(int i = 0; i < numberOfStudent; i++){
+                int id = dis.readInt();
+                String name = dis.readUTF();
+                List<Subject> subjects = new ArrayList<>();
+                students.add(new Student(id, name, subjects));
+
+                int numberOfSubject = dis.readInt();
+                for(int j = 0; j < numberOfSubject; j++){
+                    int subjectID = dis.readInt();
+                    String subjectName = dis.readUTF();
+                    int credits = dis.readInt();
+                    subjects.add(new Subject(subjectID, subjectName, credits));
+                }
+            }
+
+            dis.close();
+            return students;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

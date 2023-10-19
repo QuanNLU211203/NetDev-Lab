@@ -1,7 +1,12 @@
 import junit.framework.TestCase;
+import model.Student;
+import model.Subject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MyFileUtilTest extends TestCase {
     @Override
@@ -103,10 +108,43 @@ public class MyFileUtilTest extends TestCase {
     }
 
     public void testFileSplit(){
-        new MyFileUtil().fileSplit("D:\\YY\\Bigfile.txt", "D:\\YY", 1024);
+        new MyFileUtil().fileSplit("D:\\YY\\news.txt", "D:\\YY", 1024);
+    }
+
+    public void testFileJoin(){
+        new MyFileUtil().fileJoin("D:\\YY\\newsjoin.txt",
+                "D:\\YY\\news-P1",
+                "D:\\YY\\news-P2",
+                "D:\\YY\\news-P3",
+                "D:\\YY\\news-P4",
+                "D:\\YY\\news-P5",
+                "D:\\YY\\news-P6",
+                "D:\\YY\\news-P7");
     }
 
     public void testFileType(){
         System.out.println(new MyFileUtil().fileType("abc.txt"));
+    }
+
+    public void testWriteStudentList(){
+        Subject subject1 = new Subject(214321, "Lập trình cơ bản", 4);
+        Subject subject2 = new Subject(214231, "Cấu trúc máy tính", 2);
+        Subject subject3 = new Subject(214242, "Nhập môn hệ điều hành", 3);
+        Subject subject4 = new Subject(214331, "Lập trình nâng cao", 4);
+        Subject subject5 = new Subject(214241, "Mạng máy tính cơ bản", 3);
+        List<Subject> subjects1 = Arrays.asList(subject1, subject2, subject3);
+        List<Subject> subjects2 = Arrays.asList(subject2, subject3, subject4);
+        List<Subject> subjects3 = Arrays.asList(subject1, subject3, subject5);
+
+        Student student1 = new Student(21130494, "Trần Minh Quân", subjects1);
+        Student student2 = new Student(18130494, "Nguyễn Siu", subjects2);
+        Student student3 = new Student(17030300, "Phạm Chi", subjects3);
+        List<Student> students = Arrays.asList(student1, student2, student3);
+
+        new MyFileUtil().writeStudentList(students, "D:\\YY\\students.txt");
+    }
+
+    public void testReadStudentList(){
+        System.out.println(new MyFileUtil().readStudentList("D:\\YY\\students.txt").toString());
     }
 }
